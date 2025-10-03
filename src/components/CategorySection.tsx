@@ -1,42 +1,37 @@
 import { PopButton } from "@/components/PopButton";
 import { Shirt, Palette, Sparkles, Zap } from "lucide-react";
+import { useCategories } from "@/hooks/useProducts";
+import { Loader2 } from "lucide-react";
 
-const categories = [
-  {
-    id: 1,
-    name: "TRENDY CLOTHES",
-    description: "The coolest outfits that scream STYLE!",
-    icon: Shirt,
-    color: "orange",
-    bgImage: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=500&h=300&fit=crop"
-  },
-  {
-    id: 2,
-    name: "ART PIECES",
-    description: "Unique artwork to decorate your world!",
-    icon: Palette,
-    color: "pink",
-    bgImage: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=500&h=300&fit=crop"
-  },
-  {
-    id: 3,
-    name: "ACCESSORIES",
-    description: "Funky add-ons for the perfect look!",
-    icon: Sparkles,
-    color: "yellow",
-    bgImage: "https://images.unsplash.com/photo-1506629905607-ce51c8d3d9eb?w=500&h=300&fit=crop"
-  },
-  {
-    id: 4,
-    name: "LIMITED EDITION",
-    description: "Rare finds you won't see anywhere else!",
-    icon: Zap,
-    color: "purple",
-    bgImage: "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=500&h=300&fit=crop"
-  }
-];
+const categoryIcons = {
+  'clothing': Shirt,
+  'art': Palette,
+  'accessories': Sparkles,
+  'limited-edition': Zap,
+};
+
+const categoryColors = {
+  'clothing': 'orange',
+  'art': 'pink',
+  'accessories': 'yellow',
+  'limited-edition': 'purple',
+} as const;
 
 export function CategorySection() {
+  const { data: categories, isLoading } = useCategories();
+
+  if (isLoading) {
+    return (
+      <section className="py-20 relative">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-center min-h-[300px]">
+            <Loader2 className="w-12 h-12 text-pop-orange animate-spin" />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-20 relative">
       <div className="absolute inset-0 dot-pattern opacity-5" />
@@ -53,8 +48,9 @@ export function CategorySection() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {categories.map((category, index) => {
-            const Icon = category.icon;
+          {categories?.map((category, index) => {
+            const Icon = categoryIcons[category.slug as keyof typeof categoryIcons] || Sparkles;
+            const color = categoryColors[category.slug as keyof typeof categoryColors] || 'orange';
             const colorClasses = {
               orange: 'border-pop-orange text-pop-orange',
               pink: 'border-pop-pink text-pop-pink',
@@ -71,14 +67,14 @@ export function CategorySection() {
               >
                 <div className="relative h-48 overflow-hidden">
                   <img
-                    src={category.bgImage}
+                    src={category.image_url}
                     alt={category.name}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                   
                   {/* Icon */}
-                  <div className={`absolute top-4 right-4 p-3 bg-white rounded-full border-3 ${colorClasses[category.color as keyof typeof colorClasses]}`}>
+                  <div className={`absolute top-4 right-4 p-3 bg-white rounded-full border-3 ${colorClasses[color]}`}>
                     <Icon className="w-6 h-6" />
                   </div>
 
@@ -91,14 +87,14 @@ export function CategorySection() {
                   
                   <div className="relative z-10">
                     <h3 className="font-bangers text-xl text-foreground mb-2">
-                      {category.name}
+                      {category.name.toUpperCase()}
                     </h3>
                     <p className="font-comic text-sm text-muted-foreground mb-4">
                       {category.description}
                     </p>
                     
                     <PopButton 
-                      variant={category.color as any} 
+                      variant={color} 
                       size="sm" 
                       className="w-full"
                       handDrawn
