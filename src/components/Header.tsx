@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { PopButton } from "@/components/PopButton";
-import { Badge } from "@/components/ui/badge";
 import { AuthDialog } from "@/components/AuthDialog";
+import { UserMenu } from "@/components/UserMenu";
+import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, User, Menu, X, Search, Heart } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   return (
     <>
@@ -15,7 +18,7 @@ export function Header() {
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <div className="flex items-center">
-              <h1 className="font-bangers text-3xl text-pop-orange transform -rotate-2">
+              <h1 className="font-bangers text-3xl text-pop-orange transform -rotate-2 cursor-pointer">
                 POP SHOP
               </h1>
               <div className="ml-2 bg-pop-yellow px-2 py-1 rounded-full transform rotate-12">
@@ -62,16 +65,22 @@ export function Header() {
                 </Badge>
               </button>
 
-              {/* User - Opens Auth Dialog */}
-              <PopButton 
-                variant="orange" 
-                size="sm" 
-                className="hidden sm:flex"
-                onClick={() => setIsAuthOpen(true)}
-              >
-                <User className="w-4 h-4 mr-1" />
-                LOGIN
-              </PopButton>
+              {/* User - Show UserMenu if authenticated, otherwise show Login button */}
+              {isAuthenticated ? (
+                <div className="hidden sm:block">
+                  <UserMenu />
+                </div>
+              ) : (
+                <PopButton 
+                  variant="orange" 
+                  size="sm" 
+                  className="hidden sm:flex"
+                  onClick={() => setIsAuthDialogOpen(true)}
+                >
+                  <User className="w-4 h-4 mr-1" />
+                  LOGIN
+                </PopButton>
+              )}
 
               {/* Mobile menu button */}
               <button
@@ -103,23 +112,29 @@ export function Header() {
                 <a href="#" className="font-comic font-bold text-foreground hover:text-pop-purple transition-colors">
                   SALE
                 </a>
-                <PopButton 
-                  variant="orange" 
-                  size="sm" 
-                  className="self-start"
-                  onClick={() => setIsAuthOpen(true)}
-                >
-                  <User className="w-4 h-4 mr-1" />
-                  LOGIN
-                </PopButton>
+                
+                {isAuthenticated ? (
+                  <div className="pt-2">
+                    <UserMenu />
+                  </div>
+                ) : (
+                  <PopButton 
+                    variant="orange" 
+                    size="sm" 
+                    className="self-start"
+                    onClick={() => setIsAuthDialogOpen(true)}
+                  >
+                    <User className="w-4 h-4 mr-1" />
+                    LOGIN
+                  </PopButton>
+                )}
               </nav>
             </div>
           )}
         </div>
       </header>
 
-      {/* Auth Dialog */}
-      <AuthDialog open={isAuthOpen} onOpenChange={setIsAuthOpen} />
+      <AuthDialog open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen} />
     </>
   );
 }
